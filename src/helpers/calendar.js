@@ -47,6 +47,28 @@ export const getMonthFirstDay = (month = THIS_MONTH, year = THIS_YEAR) => {
 	return +(new Date(`${year}-${zeroPad(month)}-01`).getDay()) + 1;
 }
 
+export const isSameMonth = (date, basedate = new Date()) => {
+	const basedateMonth = +(basedate.getMonth()) + 1;
+	const basedateYear = basedate.getFullYear();
+
+	const dateMonth = +(date.getMonth()) + 1;
+	const dateYear = date.getFullYear();
+
+	return (+basedateMonth === +dateMonth) && (+basedateYear === +dateYear);
+}
+
+export const isSameDay = (date, basedate = new Date()) => {
+	const basedateDate = basedate.getDate();
+	const basedateMonth = +(basedate.getMonth()) + 1;
+	const basedateYear = basedate.getFullYear();
+
+	const dateDate = date.getDate();
+	const dateMonth = +(date.getMonth()) + 1;
+	const dateYear = date.getFullYear();
+
+	return (+basedateDate === +dateDate) && (+basedateMonth === +dateMonth) && (+basedateYear === +dateYear);
+}
+
 export default (month = THIS_MONTH, year = THIS_YEAR) => {
 	const monthDays = getMonthDays(month, year);
 	const monthFirstDay = getMonthFirstDay(month, year);
