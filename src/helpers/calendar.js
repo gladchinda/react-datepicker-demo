@@ -69,6 +69,20 @@ export const isSameDay = (date, basedate = new Date()) => {
 	return (+basedateDate === +dateDate) && (+basedateMonth === +dateMonth) && (+basedateYear === +dateYear);
 }
 
+export const getPreviousMonth = (month, year) => {
+	const prevMonth = (month > 1) ? month - 1 : 12;
+	const prevMonthYear = (month > 1) ? year : year - 1;
+
+	return { month: prevMonth, year: prevMonthYear };
+}
+
+export const getNextMonth = (month, year) => {
+	const nextMonth = (month < 12) ? month + 1 : 1;
+	const nextMonthYear = (month < 12) ? year : year + 1;
+
+	return { month: nextMonth, year: nextMonthYear };
+}
+
 export default (month = THIS_MONTH, year = THIS_YEAR) => {
 	const monthDays = getMonthDays(month, year);
 	const monthFirstDay = getMonthFirstDay(month, year);
@@ -76,12 +90,10 @@ export default (month = THIS_MONTH, year = THIS_YEAR) => {
 	const daysFromPrevMonth = monthFirstDay - 1;
 	const daysFromNextMonth = (CALENDAR_WEEKS * 7) - (daysFromPrevMonth + monthDays);
 
-	const prevMonth = (month > 1) ? month - 1 : 12;
-	const prevMonthYear = (month > 1) ? year : year - 1;
-	const prevMonthDays = getMonthDays(prevMonth, prevMonthYear);
+	const { month: prevMonth, year: prevMonthYear } = getPreviousMonth(month, year);
+	const { month: nextMonth, year: nextMonthYear } = getNextMonth(month, year);
 
-	const nextMonth = (month < 12) ? month + 1 : 1;
-	const nextMonthYear = (month < 12) ? year : year + 1;
+	const prevMonthDays = getMonthDays(prevMonth, prevMonthYear);
 
 	const prevMonthDates = [...new Array(daysFromPrevMonth)].map((n, index) => {
 		const day = index + 1 + (prevMonthDays - daysFromPrevMonth);

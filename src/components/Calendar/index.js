@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
-import calendar, { isSameDay, isSameMonth, WEEK_DAYS, CALENDAR_MONTHS } from '../../helpers/calendar';
-import { CalendarGrid, CalendarDay, CalendarDate, HighlightedCalendarDate, TodayCalendarDate } from './styles';
+import calendar, { isSameDay, isSameMonth, getNextMonth, getPreviousMonth, WEEK_DAYS, CALENDAR_MONTHS } from '../../helpers/calendar';
+import { ArrowLeft, ArrowRight, CalendarContainer, CalendarHeader, CalendarGrid, CalendarDay, CalendarDate, CalendarMonth, HighlightedCalendarDate, TodayCalendarDate } from './styles';
 
 class Calendar extends Component {
 
@@ -27,14 +27,28 @@ class Calendar extends Component {
 		!isSameDay(date, current) && this.setState(this.resolveStateFromDate(date));
 	}
 
+	gotoPreviousMonth = evt => {
+		evt && evt.preventDefault();
+		const { month, year } = this.state;
+		this.setState(getPreviousMonth(month, year));
+	}
+
+	gotoNextMonth = evt => {
+		evt && evt.preventDefault();
+		const { month, year } = this.state;
+		this.setState(getNextMonth(month, year));
+	}
+
 	renderMonthAndYear = () => {
 		const { month, year } = this.state;
 		const monthname = Object.keys(CALENDAR_MONTHS)[ Math.max(0, Math.min(month - 1, 11)) ];
 
 		return (
-			<div className="font-weight-bold text-center py-5" style={{ fontSize: '3rem' }}>
-				<span>{monthname} {year}</span>
-			</div>
+			<CalendarHeader>
+				<ArrowLeft onClick={this.gotoPreviousMonth} />
+				<CalendarMonth>{monthname} {year}</CalendarMonth>
+				<ArrowRight onClick={this.gotoNextMonth} />
+			</CalendarHeader>
 		)
 	}
 
@@ -66,11 +80,12 @@ class Calendar extends Component {
 
 	render() {
 		let { current, month, year } = this.state;
-		month = current ? +(current.getMonth()) + 1 : month;
-		year = current ? current.getFullYear() : year;
+
+		month = month || +(current.getMonth()) + 1;
+		year = year || current.getFullYear();
 
 		return (
-			<Fragment>
+			<CalendarContainer>
 
 				{ this.renderMonthAndYear() }
 
@@ -84,7 +99,7 @@ class Calendar extends Component {
 					</Fragment>
 				</CalendarGrid>
 
-			</Fragment>
+			</CalendarContainer>
 		)
 	}
 
