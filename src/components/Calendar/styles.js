@@ -84,11 +84,16 @@ export const CalendarDate = styled(CalendarCell)`
 	border-right: ${props => (props.index % 7) + 1 === 7 ? `none` : `1px solid #ddd`};
 	color: ${props => props.inMonth ? `#333` : `#ddd`};
   grid-row: ${props => Math.floor(props.index / 7) + 2} / span 1;
+	transition: all .4s ease-out;
+	:hover {
+		color: #06c;
+		background: rgba(0, 102, 204, 0.075);
+	}
 `;
 
 export const HighlightedCalendarDate = styled(CalendarDate)`
-	color: #fff;
-	background: #06c;
+	color: #fff !important;
+	background: #06c !important;
 	position: relative;
 	::before {
 		content: '';
@@ -102,8 +107,8 @@ export const HighlightedCalendarDate = styled(CalendarDate)`
 `;
 
 export const TodayCalendarDate = styled(HighlightedCalendarDate)`
-	color: #06c;
-	background: transparent;
+	color: #06c !important;
+	background: transparent !important;
 	::after {
 		content: '';
 		position: absolute;
@@ -112,5 +117,9 @@ export const TodayCalendarDate = styled(HighlightedCalendarDate)`
 		border-bottom: 0.75em solid #06c;
 		border-left: 0.75em solid transparent;
 		border-top: 0.75em solid transparent;
+	}
+	:hover {
+		color: #06c !important;
+		background: rgba(0, 102, 204, 0.075) !important;
 	}
 `;

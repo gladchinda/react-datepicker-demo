@@ -30,7 +30,15 @@ export const CALENDAR_WEEKS = 6;
 
 export const zeroPad = (value, length) => `${value}`.padStart(length, '0')
 
+export const isDate = date => {
+	const isDate = Object.prototype.toString.call(date) === '[object Date]';
+	const isValidDate = date && !Number.isNaN(date.valueOf());
+	return isDate && isValidDate;
+}
+
 export const getDateISO = (date = new Date) => {
+	if (!isDate(date)) return null;
+
 	return [
 		date.getFullYear(),
 		zeroPad(+date.getMonth() + 1, 2),
@@ -56,6 +64,8 @@ export const getMonthFirstDay = (month = THIS_MONTH, year = THIS_YEAR) => {
 }
 
 export const isSameMonth = (date, basedate = new Date()) => {
+	if (!(isDate(date) && isDate(basedate))) return false;
+
 	const basedateMonth = +(basedate.getMonth()) + 1;
 	const basedateYear = basedate.getFullYear();
 
@@ -66,6 +76,8 @@ export const isSameMonth = (date, basedate = new Date()) => {
 }
 
 export const isSameDay = (date, basedate = new Date()) => {
+	if (!(isDate(date) && isDate(basedate))) return false;
+
 	const basedateDate = basedate.getDate();
 	const basedateMonth = +(basedate.getMonth()) + 1;
 	const basedateYear = basedate.getFullYear();

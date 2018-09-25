@@ -1,17 +1,17 @@
 import React, { Component, Fragment } from 'react';
 import { ArrowLeft, ArrowRight, CalendarContainer, CalendarHeader, CalendarGrid, CalendarDay, CalendarDate, CalendarMonth, HighlightedCalendarDate, TodayCalendarDate } from './styles';
-import calendar, { isSameDay, isSameMonth, getDateISO, getNextMonth, getPreviousMonth, WEEK_DAYS, CALENDAR_MONTHS } from '../../helpers/calendar';
+import calendar, { isDate, isSameDay, isSameMonth, getDateISO, getNextMonth, getPreviousMonth, WEEK_DAYS, CALENDAR_MONTHS } from '../../helpers/calendar';
 
 class Calendar extends Component {
 
-	state = this.resolveStateFromProp()
+	state = { ...this.resolveStateFromProp(), today: new Date }
 
 	resolveStateFromDate(date) {
-		const isDate = Object.prototype.toString.call(date) === '[object Date]';
-		const _date = isDate ? date : new Date;
+		const isDateObject = isDate(date);
+		const _date = isDateObject ? date : new Date;
 
 		return {
-			current: isDate ? date : null,
+			current: isDateObject ? date : null,
 			month: +(_date.getMonth()) + 1,
 			year: _date.getFullYear()
 		};
@@ -19,6 +19,14 @@ class Calendar extends Component {
 
 	resolveStateFromProp() {
 		return this.resolveStateFromDate(this.props.date);
+	}
+
+	getCalendarDates = () => {
+		const { current, month, year } = this.state;
+		const calendarMonth = month || +(current.getMonth()) + 1;
+		const calendarYear = year || current.getFullYear();
+
+		return calendar(calendarMonth, calendarYear);
 	}
 
 	gotoDate = date => evt => {
@@ -65,6 +73,10 @@ class Calendar extends Component {
 		this.pressureTimeout && clearTimeout(this.pressureTimeout);
 	}
 
+	clearDayTimeout = () => {
+		this.dayTimeout && clearTimeout(this.dayTimeout);
+	}
+
 	handlePrevious = evt => {
 		evt && evt.preventDefault();
 		const fn = evt.shiftKey ? this.gotoPreviousYear : this.gotoPreviousMonth;
@@ -96,10 +108,10 @@ class Calendar extends Component {
 	}
 
 	renderCalendarDate = (date, index) => {
-		const { current, month, year } = this.state;
+		const { current, month, year, today } = this.state;
 		const _date = new Date(date.join('-'));
 
-		const isToday = isSameDay(_date);
+		const isToday = isSameDay(_date, today);
 		const isCurrent = current && isSameDay(_date, current);
 		const inMonth = (month && year) && isSameMonth(_date, new Date([year, month, 1].join('-')));
 
@@ -114,12 +126,32 @@ class Calendar extends Component {
 		return <DateComponent key={getDateISO(_date)} {...props}>{ _date.getDate() }</DateComponent>
 	}
 
+	componentDidMount() {
+		const now = new Date;
+		const tomorrow = new Date().setHours(0, 0, 0, 0) + (24 * 60 * 60 * 1000);
+		const ms = tomorrow - now;
+
+		this.dayTimeout = setTimeout(() => {
+			this.setState({ today: new Date }, this.clearDayTimeout);
+		}, ms);
+	}
+
+	componentDidUpdate(prevProps) {
+		const { date, onDateChanged } = this.props;
+		const { date: prevDate } = prevProps;
+		const dateMatch = (date == prevDate) || isSameDay(date, prevDate);
+
+		!dateMatch && this.setState(this.resolveStateFromDate(date), () => {
+			(typeof onDateChanged === 'function') && onDateChanged(date);
+		});
+	}
+
+	componentWillUnmount() {
+		this.clearPressureTimer();
+		this.clearDayTimeout();
+	}
+
 	render() {
-		let { current, month, year } = this.state;
-
-		month = month || +(current.getMonth()) + 1;
-		year = year || current.getFullYear();
-
 		return (
 			<CalendarContainer>
 
@@ -131,7 +163,7 @@ class Calendar extends Component {
 					</Fragment>
 
 					<Fragment>
-						{ calendar(month, year).map(this.renderCalendarDate) }
+						{ this.getCalendarDates().map(this.renderCalendarDate) }
 					</Fragment>
 				</CalendarGrid>
 
