@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
-import calendar, { isSameDay, isSameMonth, getNextMonth, getPreviousMonth, WEEK_DAYS, CALENDAR_MONTHS } from '../../helpers/calendar';
 import { ArrowLeft, ArrowRight, CalendarContainer, CalendarHeader, CalendarGrid, CalendarDay, CalendarDate, CalendarMonth, HighlightedCalendarDate, TodayCalendarDate } from './styles';
+import calendar, { isSameDay, isSameMonth, getNextMonth, getPreviousMonth, WEEK_DAYS, CALENDAR_MONTHS } from '../../helpers/calendar';
 
 class Calendar extends Component {
 
@@ -24,7 +24,7 @@ class Calendar extends Component {
 	gotoDate = date => evt => {
 		evt && evt.preventDefault();
 		const { current } = this.state;
-		!isSameDay(date, current) && this.setState(this.resolveStateFromDate(date));
+		!(current && isSameDay(date, current)) && this.setState(this.resolveStateFromDate(date));
 	}
 
 	gotoPreviousMonth = evt => {
@@ -45,9 +45,9 @@ class Calendar extends Component {
 
 		return (
 			<CalendarHeader>
-				<ArrowLeft onClick={this.gotoPreviousMonth} />
+				<ArrowLeft onClick={this.gotoPreviousMonth} title="Previous Month" />
 				<CalendarMonth>{monthname} {year}</CalendarMonth>
-				<ArrowRight onClick={this.gotoNextMonth} />
+				<ArrowRight onClick={this.gotoNextMonth} title="Next Month" />
 			</CalendarHeader>
 		)
 	}
@@ -69,7 +69,7 @@ class Calendar extends Component {
 
 		const onClick = this.gotoDate(_date);
 
-		const props = { index, inMonth, onClick };
+		const props = { index, inMonth, onClick, title: _date.toDateString() };
 
 		const DateComponent = isCurrent
 			? HighlightedCalendarDate
