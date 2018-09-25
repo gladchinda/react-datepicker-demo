@@ -6,7 +6,7 @@ Prior experience working with the React framework is required for complete under
 
 Here is a screenshot of the demo React application:
 
-<!-- ![App Screenshot](https://i.imgur.com/mdX2HXy.gif) -->
+![App Screenshot](https://i.imgur.com/BoH5d5b.gif)
 
 Before you begin, make sure you have [`npm`][npm] and [`node`][node] installed on your system. It is recommended that you use [`yarn`][yarn] instead of `npm` to run and manage the package. Follow this [guide to install yarn][yarn-install] on your system.
 
