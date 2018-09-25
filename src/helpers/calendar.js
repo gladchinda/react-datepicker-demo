@@ -28,7 +28,15 @@ export const CALENDAR_MONTHS = {
 
 export const CALENDAR_WEEKS = 6;
 
-const zeroPad = (value, length) => `${value}`.padStart(length, '0')
+export const zeroPad = (value, length) => `${value}`.padStart(length, '0')
+
+export const getDateISO = (date = new Date) => {
+	return [
+		date.getFullYear(),
+		zeroPad(+date.getMonth() + 1, 2),
+		zeroPad(+date.getDate(), 2)
+	].join('-');
+}
 
 export const getMonthDays = (month = THIS_MONTH, year = THIS_YEAR) => {
 	const months30 = [4, 6, 9, 11];
@@ -44,7 +52,7 @@ export const getMonthDays = (month = THIS_MONTH, year = THIS_YEAR) => {
 }
 
 export const getMonthFirstDay = (month = THIS_MONTH, year = THIS_YEAR) => {
-	return +(new Date(`${year}-${zeroPad(month)}-01`).getDay()) + 1;
+	return +(new Date(`${year}-${zeroPad(month, 2)}-01`).getDay()) + 1;
 }
 
 export const isSameMonth = (date, basedate = new Date()) => {
@@ -97,17 +105,17 @@ export default (month = THIS_MONTH, year = THIS_YEAR) => {
 
 	const prevMonthDates = [...new Array(daysFromPrevMonth)].map((n, index) => {
 		const day = index + 1 + (prevMonthDays - daysFromPrevMonth);
-		return [ prevMonthYear, zeroPad(prevMonth), zeroPad(day) ];
+		return [ prevMonthYear, zeroPad(prevMonth, 2), zeroPad(day, 2) ];
 	});
 
 	const thisMonthDates = [...new Array(monthDays)].map((n, index) => {
 		const day = index + 1;
-		return [year, zeroPad(month), zeroPad(day)];
+		return [year, zeroPad(month, 2), zeroPad(day, 2)];
 	});
 
 	const nextMonthDates = [...new Array(daysFromNextMonth)].map((n, index) => {
 		const day = index + 1;
-		return [nextMonthYear, zeroPad(nextMonth), zeroPad(day)];
+		return [nextMonthYear, zeroPad(nextMonth, 2), zeroPad(day, 2)];
 	});
 
 	return [ ...prevMonthDates, ...thisMonthDates, ...nextMonthDates ];

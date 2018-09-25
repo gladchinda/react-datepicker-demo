@@ -16,7 +16,7 @@ export const Arrow = styled.button`
 
 export const ArrowLeft = styled(Arrow)`
 	border-right: 2.4em solid #ccc;
-	left: 2rem;
+	left: 1.5rem;
 	:hover {
 		border-right-color: #06c;
 	}
@@ -24,7 +24,7 @@ export const ArrowLeft = styled(Arrow)`
 
 export const ArrowRight = styled(Arrow)`
 	border-left: 2.4em solid #ccc;
-	right: 2rem;
+	right: 1.5rem;
 	:hover {
 		border-left-color: #06c;
 	}
@@ -32,7 +32,7 @@ export const ArrowRight = styled(Arrow)`
 
 export const CalendarContainer = styled.div`
 	font-size: 5px;
-	border: 1px solid #ddd;
+	border: 2px solid #06c;
 	border-radius: 5px;
 	overflow: hidden;
 `;
@@ -51,7 +51,7 @@ export const CalendarGrid = styled.div`
 export const CalendarMonth = styled.div`
 	font-weight: 500;
 	font-size: 5em;
-	color: #333;
+	color: #06c;
 	text-align: center;
 	padding: 0.5em 0.25em;
 	word-spacing: 5px;
@@ -70,15 +70,16 @@ export const CalendarCell = styled.div`
 export const CalendarDay = styled(CalendarCell)`
 	font-weight: 600;
 	font-size: 2.25em;
-	color: #999;
-	border-top: 1px solid #ddd;
+	color: #06c;
+	border-top: 2px solid #06c;
+	border-bottom: 2px solid #06c;
+	border-right: ${props => (props.index % 7) + 1 === 7 ? `none` : `2px solid #06c`};
 `;
 
 export const CalendarDate = styled(CalendarCell)`
 	font-weight: ${props => props.inMonth ? 500 : 300};
 	font-size: 4em;
 	cursor: pointer;
-	border-top: ${props => ((props.index + 1) / 7) <= 1 ? `1px solid #ddd` : `none`};
 	border-bottom: ${props => ((props.index + 1) / 7) <= 5 ? `1px solid #ddd` : `none`};
 	border-right: ${props => (props.index % 7) + 1 === 7 ? `none` : `1px solid #ddd`};
 	color: ${props => props.inMonth ? `#333` : `#ddd`};

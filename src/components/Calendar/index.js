@@ -1,6 +1,6 @@
 import React, { Component, Fragment } from 'react';
 import { ArrowLeft, ArrowRight, CalendarContainer, CalendarHeader, CalendarGrid, CalendarDay, CalendarDate, CalendarMonth, HighlightedCalendarDate, TodayCalendarDate } from './styles';
-import calendar, { isSameDay, isSameMonth, getNextMonth, getPreviousMonth, WEEK_DAYS, CALENDAR_MONTHS } from '../../helpers/calendar';
+import calendar, { isSameDay, isSameMonth, getDateISO, getNextMonth, getPreviousMonth, WEEK_DAYS, CALENDAR_MONTHS } from '../../helpers/calendar';
 
 class Calendar extends Component {
 
@@ -24,19 +24,57 @@ class Calendar extends Component {
 	gotoDate = date => evt => {
 		evt && evt.preventDefault();
 		const { current } = this.state;
-		!(current && isSameDay(date, current)) && this.setState(this.resolveStateFromDate(date));
+		const { onDateChanged } = this.props;
+
+		!(current && isSameDay(date, current)) && this.setState(this.resolveStateFromDate(date), () => {
+			(typeof onDateChanged === 'function') && onDateChanged(date);
+		});
 	}
 
-	gotoPreviousMonth = evt => {
-		evt && evt.preventDefault();
+	gotoPreviousMonth = () => {
 		const { month, year } = this.state;
 		this.setState(getPreviousMonth(month, year));
 	}
 
-	gotoNextMonth = evt => {
-		evt && evt.preventDefault();
+	gotoNextMonth = () => {
 		const { month, year } = this.state;
 		this.setState(getNextMonth(month, year));
+	}
+
+	gotoPreviousYear = (skip = 1) => {
+		const { year } = this.state;
+		this.setState({ year: year - skip });
+	}
+
+	gotoNextYear = (skip = 1) => {
+		const { year } = this.state;
+		this.setState({ year: year + skip });
+	}
+
+	handlePressure = fn => {
+		if (typeof fn === 'function') {
+			fn();
+			this.pressureTimeout = setTimeout(() => {
+				this.pressureTimer = setInterval(fn, 100);
+			}, 500);
+		}
+	}
+
+	clearPressureTimer = () => {
+		this.pressureTimer && clearInterval(this.pressureTimer);
+		this.pressureTimeout && clearTimeout(this.pressureTimeout);
+	}
+
+	handlePrevious = evt => {
+		evt && evt.preventDefault();
+		const fn = evt.shiftKey ? this.gotoPreviousYear : this.gotoPreviousMonth;
+		this.handlePressure(fn);
+	}
+
+	handleNext = evt => {
+		evt && evt.preventDefault();
+		const fn = evt.shiftKey ? this.gotoNextYear : this.gotoNextMonth;
+		this.handlePressure(fn);
 	}
 
 	renderMonthAndYear = () => {
@@ -45,9 +83,9 @@ class Calendar extends Component {
 
 		return (
 			<CalendarHeader>
-				<ArrowLeft onClick={this.gotoPreviousMonth} title="Previous Month" />
+				<ArrowLeft onMouseDown={this.handlePrevious} onMouseUp={this.clearPressureTimer} title="Previous Month" />
 				<CalendarMonth>{monthname} {year}</CalendarMonth>
-				<ArrowRight onClick={this.gotoNextMonth} title="Next Month" />
+				<ArrowRight onMouseDown={this.handleNext} onMouseUp={this.clearPressureTimer} title="Next Month" />
 			</CalendarHeader>
 		)
 	}
@@ -59,9 +97,7 @@ class Calendar extends Component {
 
 	renderCalendarDate = (date, index) => {
 		const { current, month, year } = this.state;
-
-		const datestring = date.join('-');
-		const _date = new Date(datestring);
+		const _date = new Date(date.join('-'));
 
 		const isToday = isSameDay(_date);
 		const isCurrent = current && isSameDay(_date, current);
@@ -75,7 +111,7 @@ class Calendar extends Component {
 			? HighlightedCalendarDate
 			: isToday ? TodayCalendarDate : CalendarDate;
 
-		return <DateComponent key={datestring} {...props}>{ _date.getDate() }</DateComponent>
+		return <DateComponent key={getDateISO(_date)} {...props}>{ _date.getDate() }</DateComponent>
 	}
 
 	render() {
