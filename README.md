@@ -28,14 +28,14 @@ yarn
 yarn start
 ```
 
-<!-- You can also get a [live demo on Code Sandbox][code-demo]. -->
+You can also get a [live demo on Code Sandbox][code-demo].
 
-<!-- [![Edit slider-control](https://codesandbox.io/static/img/play-codesandbox.svg)][code-demo] -->
+[![Edit react-datepicker](https://codesandbox.io/static/img/play-codesandbox.svg)][code-demo]
 
 
 [react-docs]: https://reactjs.org/docs/
 [react]: https://reactjs.org/
-[code-demo]: https://codesandbox.io/s/yn6wy1vnj
+[code-demo]: https://codesandbox.io/s/o952xlqq9y
 [node]: https://nodejs.org/en/
 [npm]: https://npmjs.com/
 [yarn]: https://yarnpkg.com/
