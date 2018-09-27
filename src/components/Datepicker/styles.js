@@ -42,6 +42,9 @@ export const DatePickerInput = styled(Input)`
 	background: transparent !important;
 	display: flex;
 	align-items: center;
+  appearance: textfield;
+  -webkit-appearance: textfield;
+  -moz-appearance: textfield;
 
 	::placeholder {
 		color: #999;
