@@ -1,25 +1,35 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { ArrowLeft, ArrowRight, CalendarContainer, CalendarHeader, CalendarGrid, CalendarDay, CalendarDate, CalendarMonth, HighlightedCalendarDate, TodayCalendarDate } from './styles';
-import calendar, { isDate, dateDiff, isSameDay, isSameMonth, getDateISO, getDateArray, getNextMonth, getPreviousMonth, WEEK_DAYS, CALENDAR_MONTHS } from '../../helpers/calendar';
+import calendar, { isDate, dateDiff, isBeforeDay, isAfterDay, isSameDay, isSameMonth, getDateISO, getDateArray, getNextMonth, getPreviousMonth, getMonthDays, WEEK_DAYS, CALENDAR_MONTHS } from '../../helpers/calendar';
 
 class Calendar extends React.Component {
 
-	state = { ...this.resolveStateFromProp(), today: new Date() }
+  state = { ...this.stateFromProp(), mindate: new Date('2016-06-20'), maxdate: new Date('2020-09-30'), today: new Date() }
 
-	resolveStateFromDate(date) {
+	stateFromDate(date) {
     const current = isDate(date) ? date : null;
     const [ year, month ] = getDateArray(current || new Date);
 		return { current, month, year };
 	}
 
-	resolveStateFromProp() {
-		return this.resolveStateFromDate(this.props.date);
+	stateFromProp() {
+		return this.stateFromDate(this.props.date);
   }
   
-  dateChangeHandler = date => () => {
+  changeHandler = date => () => {
     const { onDateChanged } = this.props;
     (typeof onDateChanged === 'function') && onDateChanged(date);
+  }
+
+  calendarWithinRange = date => {
+    if (!isDate(date)) return false;
+
+    const { maxdate, mindate } = this.state;
+    const min = new Date(new Date(+mindate).setDate(1)).setHours(0, 0, 0, 0);
+    const max = new Date(new Date(+maxdate).setDate(getMonthDays(maxdate))).setHours(23, 59, 59, 999);
+
+    return date >= min && date <= max;
   }
 
 	getCalendarDates = () => {
@@ -30,33 +40,40 @@ class Calendar extends React.Component {
 
 	gotoDate = date => evt => {
 		evt && evt.preventDefault();
-    const { current } = this.state;
+    const { current, maxdate, mindate } = this.state;
     const isCurrent = current && isSameDay(date, current);
+    const outOfRange = isBeforeDay(date, mindate) || isAfterDay(date, maxdate);
 
-		!isCurrent && this.setState(this.resolveStateFromDate(date), this.dateChangeHandler(date));
+    !(isCurrent || outOfRange) && this.setState(this.stateFromDate(date), this.changeHandler(date));
 	}
 
 	gotoPreviousMonth = () => {
     const { month, year } = this.state;
-    const date = new Date([year, month]);
-		this.setState(getPreviousMonth(date));
+    const previousMonth = getPreviousMonth(new Date([year, month]));
+    const previous = new Date([ previousMonth.year, previousMonth.month ]);
+
+    this.calendarWithinRange(previous) && this.setState(previousMonth);
 	}
 
 	gotoNextMonth = () => {
     const { month, year } = this.state;
-    const date = new Date([year, month]);
-		this.setState(getNextMonth(date));
+    const nextMonth = getNextMonth(new Date([year, month]));
+    const next = new Date([ nextMonth.year, nextMonth.month ]);
+
+    this.calendarWithinRange(next) && this.setState(nextMonth);
 	}
 
-	gotoPreviousYear = () => {
-		const { year } = this.state;
-		this.setState({ year: year - 1 });
-	}
+  gotoPreviousYear = () => {
+    const { month, year } = this.state;
+    const previous = new Date([year - 1, month]);
+    this.calendarWithinRange(previous) && this.setState({ year: year - 1 });
+  }
 
-	gotoNextYear = () => {
-		const { year } = this.state;
-		this.setState({ year: year + 1 });
-	}
+  gotoNextYear = () => {
+    const { month, year } = this.state;
+    const next = new Date([year + 1, month]);
+    this.calendarWithinRange(next) && this.setState({ year: year + 1 });
+  }
 
 	handlePressure = fn => {
 		if (typeof fn === 'function') {
@@ -106,17 +123,19 @@ class Calendar extends React.Component {
 	}
 
 	renderCalendarDate = (date, index) => {
-		const { current, month, year, today } = this.state;
+		const { current, month, year, today, maxdate, mindate } = this.state;
     const thisDay = new Date(date);
     const monthFirstDay = new Date([year, month]);
 
 		const isToday = !!today && isSameDay(thisDay, today);
     const isCurrent = !!current && isSameDay(thisDay, current);
     const inMonth = !!(month && year) && isSameMonth(thisDay, monthFirstDay);
+    const outOfRange = isBeforeDay(thisDay, mindate) || isAfterDay(thisDay, maxdate);
 
 		const props = {
       index,
       inMonth,
+      inRange: !outOfRange,
       onClick: this.gotoDate(thisDay),
       title: thisDay.toDateString()
     };
@@ -145,7 +164,7 @@ class Calendar extends React.Component {
 		const { date: prevDate } = prevProps;
 		const dateMatch = (date === prevDate) || isSameDay(date, prevDate);
 
-    !dateMatch && this.setState(this.resolveStateFromDate(date), this.dateChangeHandler(date));
+    !dateMatch && this.setState(this.stateFromDate(date), this.changeHandler(date));
 	}
 
 	componentWillUnmount() {

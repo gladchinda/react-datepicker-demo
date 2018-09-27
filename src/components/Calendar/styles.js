@@ -63,6 +63,7 @@ export const CalendarCell = styled.div`
 	align-self: center;
 	letter-spacing: 0.1rem;
 	padding: 0.6em 0.25em;
+	position: relative;
 	user-select: none;
   grid-column: ${props => (props.index % 7) + 1} / span 1;
 `;
@@ -79,47 +80,51 @@ export const CalendarDay = styled(CalendarCell)`
 export const CalendarDate = styled(CalendarCell)`
 	font-weight: ${props => props.inMonth ? 500 : 300};
 	font-size: 4em;
-	cursor: pointer;
+	cursor: ${props => props.inRange ? 'pointer' : 'default'};
 	border-bottom: ${props => ((props.index + 1) / 7) <= 5 ? `1px solid #ddd` : `none`};
 	border-right: ${props => (props.index % 7) + 1 === 7 ? `none` : `1px solid #ddd`};
-	color: ${props => props.inMonth ? `#333` : `#ddd`};
+	color: ${props => props.inRange ? props.inMonth ? `#333` : `#ddd` : `#ddd !important`};
+  background: ${props => props.inRange ? 'transparent' : `#f6f6f6 !important`};
   grid-row: ${props => Math.floor(props.index / 7) + 2} / span 1;
 	transition: all .4s ease-out;
-	:hover {
-		color: #06c;
-		background: rgba(0, 102, 204, 0.075);
-	}
+  :hover {
+    color: #06c;
+    background: rgba(0, 102, 204, 0.075);
+  }
 `;
 
 export const HighlightedCalendarDate = styled(CalendarDate)`
-	color: #fff !important;
-	background: #06c !important;
-	position: relative;
-	::before {
-		content: '';
-		position: absolute;
-		top: -1px;
-		left: -1px;
-		width: calc(100% + 2px);
-		height: calc(100% + 2px);
-		border: 2px solid #06c;
-	}
+  ${props => props.inRange && `
+	  color: #fff !important;
+	  background: #06c !important;
+    ::before {
+      content: '';
+      position: absolute;
+      top: -1px;
+      left: -1px;
+      width: calc(100% + 2px);
+      height: calc(100% + 2px);
+      border: 2px solid #06c;
+    }
+  `}
 `;
 
 export const TodayCalendarDate = styled(HighlightedCalendarDate)`
-	color: #06c !important;
-	background: transparent !important;
-	::after {
-		content: '';
-		position: absolute;
-		right: 0;
-		bottom: 0;
-		border-bottom: 0.75em solid #06c;
-		border-left: 0.75em solid transparent;
-		border-top: 0.75em solid transparent;
-	}
-	:hover {
-		color: #06c !important;
-		background: rgba(0, 102, 204, 0.075) !important;
-	}
+  ${props => props.inRange && `
+    color: #06c !important;
+	  background: transparent !important;
+    ::after {
+      content: '';
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      border-bottom: 0.75em solid #06c;
+      border-left: 0.75em solid transparent;
+      border-top: 0.75em solid transparent;
+    }
+    :hover {
+      color: #06c !important;
+      background: rgba(0, 102, 204, 0.075) !important;
+    }
+  `}
 `;
