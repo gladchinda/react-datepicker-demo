@@ -84,7 +84,7 @@ export const CalendarDate = styled(CalendarCell)`
 	border-bottom: ${props => ((props.index + 1) / 7) <= 5 ? `1px solid #ddd` : `none`};
 	border-right: ${props => (props.index % 7) + 1 === 7 ? `none` : `1px solid #ddd`};
 	color: ${props => props.inRange ? props.inMonth ? `#333` : `#ddd` : `#ddd !important`};
-  background: ${props => props.inRange ? 'transparent' : `#f6f6f6 !important`};
+  background: ${props => props.inRange ? 'transparent' : `rgba(102, 25, 0, 0.04) !important`};
   grid-row: ${props => Math.floor(props.index / 7) + 2} / span 1;
 	transition: all .4s ease-out;
   :hover {

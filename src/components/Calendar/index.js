@@ -5,16 +5,29 @@ import calendar, { isDate, dateDiff, isBeforeDay, isAfterDay, isSameDay, isSameM
 
 class Calendar extends React.Component {
 
-  state = { ...this.stateFromProp(), mindate: new Date('2016-06-20'), maxdate: new Date('2020-09-30'), today: new Date() }
+  state = { ...this.stateFromProp(), today: new Date }
 
-	stateFromDate(date) {
-    const current = isDate(date) ? date : null;
-    const [ year, month ] = getDateArray(current || new Date);
-		return { current, month, year };
+	stateFromDate({ date, min, max } = {}) {
+    const { mindate: stateMinDate, maxdate: stateMaxDate, current: stateCurrent } = this.state || {};
+    const minDate = min || stateMinDate;
+    const maxDate = max || stateMaxDate;
+    const currentDate = date || stateCurrent;
+
+    const mindate = isAfterDay(minDate, maxDate) ? null : minDate;
+    const maxdate = isBeforeDay(maxDate, minDate) ? null : maxDate;
+    const current = this.calendarWithinRange(currentDate, { mindate, maxdate }) ? currentDate : null;
+
+    const calendarDate = current || new Date;
+
+    const [ year, month ] = getDateArray(
+      this.calendarWithinRange(calendarDate, { mindate, maxdate }) ? calendarDate : maxdate
+    );
+
+		return { current, month, year, mindate, maxdate };
 	}
 
 	stateFromProp() {
-		return this.stateFromDate(this.props.date);
+		return this.stateFromDate(this.props);
   }
   
   changeHandler = date => () => {
@@ -22,14 +35,12 @@ class Calendar extends React.Component {
     (typeof onDateChanged === 'function') && onDateChanged(date);
   }
 
-  calendarWithinRange = date => {
+  calendarWithinRange(date, { maxdate, mindate } = this.state) {
     if (!isDate(date)) return false;
-
-    const { maxdate, mindate } = this.state;
     const min = new Date(new Date(+mindate).setDate(1)).setHours(0, 0, 0, 0);
     const max = new Date(new Date(+maxdate).setDate(getMonthDays(maxdate))).setHours(23, 59, 59, 999);
 
-    return date >= min && date <= max;
+    return (date >= min || !mindate) && (date <= max || !maxdate);
   }
 
 	getCalendarDates = () => {
@@ -44,7 +55,7 @@ class Calendar extends React.Component {
     const isCurrent = current && isSameDay(date, current);
     const outOfRange = isBeforeDay(date, mindate) || isAfterDay(date, maxdate);
 
-    !(isCurrent || outOfRange) && this.setState(this.stateFromDate(date), this.changeHandler(date));
+    !(isCurrent || outOfRange) && this.setState(this.stateFromDate({ date }), this.changeHandler(date));
 	}
 
 	gotoPreviousMonth = () => {
@@ -130,12 +141,12 @@ class Calendar extends React.Component {
 		const isToday = !!today && isSameDay(thisDay, today);
     const isCurrent = !!current && isSameDay(thisDay, current);
     const inMonth = !!(month && year) && isSameMonth(thisDay, monthFirstDay);
-    const outOfRange = isBeforeDay(thisDay, mindate) || isAfterDay(thisDay, maxdate);
+    const inRange = !(isBeforeDay(thisDay, mindate) || isAfterDay(thisDay, maxdate));
 
 		const props = {
       index,
       inMonth,
-      inRange: !outOfRange,
+      inRange,
       onClick: this.gotoDate(thisDay),
       title: thisDay.toDateString()
     };
@@ -152,19 +163,22 @@ class Calendar extends React.Component {
 	}
 
 	componentDidMount() {
-		const tomorrow = new Date().setHours(0, 0, 0, 0) + (24 * 60 * 60 * 1000);
-
+    const tomorrow = new Date().setHours(0, 0, 0, 0) + (24 * 60 * 60 * 1000);
+    
 		this.dayTimeout = setTimeout(() => {
 			this.setState({ today: new Date }, this.clearDayTimeout);
 		}, dateDiff(tomorrow));
 	}
 
 	componentDidUpdate(prevProps) {
-		const { date } = this.props;
-		const { date: prevDate } = prevProps;
-		const dateMatch = (date === prevDate) || isSameDay(date, prevDate);
+		const { date, min, max } = this.props;
+    const { date: prevDate, min: prevMin, max: prevMax } = prevProps;
+    
+    const dateMatch = (date === prevDate) || isSameDay(date, prevDate);
+    const minMatch = (min === prevMin) || isSameDay(min, prevMin);
+    const maxMatch = (max === prevMax) || isSameDay(max, prevMax);
 
-    !dateMatch && this.setState(this.stateFromDate(date), this.changeHandler(date));
+    !(dateMatch && minMatch && maxMatch) && this.setState(this.stateFromDate(date), this.changeHandler(date));
 	}
 
 	componentWillUnmount() {
@@ -195,6 +209,8 @@ class Calendar extends React.Component {
 }
 
 Calendar.propTypes = {
+  min: PropTypes.instanceOf(Date),
+  max: PropTypes.instanceOf(Date),
   date: PropTypes.instanceOf(Date),
   onDateChanged: PropTypes.func
 };
