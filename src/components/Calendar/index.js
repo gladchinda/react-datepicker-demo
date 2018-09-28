@@ -86,18 +86,38 @@ class Calendar extends React.Component {
     this.calendarWithinRange(next) && this.setState({ year: year + 1 });
   }
 
-	handlePressure = fn => {
-		if (typeof fn === 'function') {
-			fn();
-			this.pressureTimeout = setTimeout(() => {
-				this.pressureTimer = setInterval(fn, 100);
-			}, 500);
-		}
-	}
+  handlePressure = evt => (fn, fnShift) => {
+    if (typeof fn === 'function' && typeof fnShift === 'function') {
+      this.pressureShift = evt.shiftKey;
+      this.pressureShift ? fnShift() : fn();
+
+      this.pressureTimeout = setTimeout(() => {
+        this.pressureTimer = setInterval(() => this.pressureShift ? fnShift() : fn(), 100);
+      }, 500);
+
+      document.addEventListener('keyup', this.handlePressureKeyup);
+      document.addEventListener('keydown', this.handlePressureKeydown);
+    }
+  }
+
+  handlePressureKeyup = evt => {
+    evt.preventDefault();
+    !evt.shiftKey && (this.pressureShift = !evt.shiftKey && false);
+  }
+
+  handlePressureKeydown = evt => {
+    evt.preventDefault();
+    evt.shiftKey && (this.pressureShift = true);
+  }
 
 	clearPressureTimer = () => {
 		this.pressureTimer && clearInterval(this.pressureTimer);
-		this.pressureTimeout && clearTimeout(this.pressureTimeout);
+    this.pressureTimeout && clearTimeout(this.pressureTimeout);
+
+    this.pressureShift = false;
+
+    document.removeEventListener('keyup', this.handlePressureKeyup);
+    document.removeEventListener('keydown', this.handlePressureKeydown);
 	}
 
 	clearDayTimeout = () => {
@@ -105,13 +125,17 @@ class Calendar extends React.Component {
 	}
 
 	handlePrevious = evt => {
-		evt && evt.preventDefault();
-    this.handlePressure(evt.shiftKey ? this.gotoPreviousYear : this.gotoPreviousMonth);
+    evt && (
+      evt.preventDefault(),
+      this.handlePressure(evt)(this.gotoPreviousMonth, this.gotoPreviousYear)
+    );
 	}
 
 	handleNext = evt => {
-		evt && evt.preventDefault();
-    this.handlePressure(evt.shiftKey ? this.gotoNextYear : this.gotoNextMonth);
+    evt && (
+      evt.preventDefault(),
+      this.handlePressure(evt)(this.gotoNextMonth, this.gotoNextYear)
+    );
 	}
 
 	renderMonthAndYear = () => {
