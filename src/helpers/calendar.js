@@ -23,8 +23,6 @@ export const CALENDAR_MONTHS = {
 	December: "Dec"
 }
 
-export const CALENDAR_WEEKS = 6;
-
 export const CALENDAR_MONTHS_30 = [4, 6, 9, 11];
 
 export const isDate = date => {
@@ -91,13 +89,17 @@ export const isSameMonth = (date1, date2) => {
     : false;
 }
 
+export const getWeeksToDisplay = (monthDays, monthFirstDay) => {
+	return Math.ceil((monthDays + monthFirstDay - 1) / 7);
+};
+
 export default (date = new Date) => {
 	const monthDays = getMonthDays(date);
 	const monthFirstDay = getMonthFirstDay(date);
   const [ year, month ] = getDateArray(date);
 
 	const daysFromPrevMonth = monthFirstDay - 1;
-	const daysFromNextMonth = (CALENDAR_WEEKS * 7) - (daysFromPrevMonth + monthDays);
+	const daysFromNextMonth = (getWeeksToDisplay(monthDays, monthFirstDay) * 7) - (daysFromPrevMonth + monthDays);
 
 	const { month: prevMonth, year: prevMonthYear } = getPreviousMonth(date);
 	const { month: nextMonth, year: nextMonthYear } = getNextMonth(date);
